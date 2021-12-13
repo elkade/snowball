@@ -26,6 +26,12 @@ moves = ["F", "F", "F", "F",'L', 'R']
 attacks = ["F",'T', "T"]
 _last_state = None
 
+from google.cloud import bigquery
+from concurrent.futures import ThreadPoolExecutor
+import time
+client = bigquery.Client()
+executor = ThreadPoolExecutor()
+
 """
 {
   "_links": {
@@ -71,9 +77,24 @@ def move():
     global _last_state
     global _last_move
     request.get_data()
+    state = request.json["arena"]["state"][request.json["_links"]["self"]["href"]]
+
+    ts = time.time()
+    executor.submit(client.insert_rows_json, 'allegro-hackathon12-2165.snowball.events', [
+        {
+            'x': stats['x'],
+            'y': stats['y'],
+            'direction': stats['direction'],
+            'wasHit': stats['wasHit'],
+            'score': stats['score'],
+            'player': player,
+            'timestamp': ts,
+        } for player, stats in request.json['arena']['state'].items()
+    ])
+
+
     logger.info(request.json)
     dims = request.json["arena"]["dims"]
-    state = list(request.json["arena"]["state"].values())[0]
     if _last_state is not None:
         move = get_move(dims, state, _last_move, _last_state)
     else:
