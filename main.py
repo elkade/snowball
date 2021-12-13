@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 moves = ["F", "F", "F", "F",'L', 'R']
+moves_2 = ["F", "F", "F", 'R', 'L', "T", "T", "T"]
 attacks = ["F",'T', "T"]
 _last_state = None
 
@@ -95,12 +96,13 @@ def move():
 
     logger.info(request.json)
     dims = request.json["arena"]["dims"]
-    if _last_state is not None:
-        move = get_move(dims, state, _last_move, _last_state)
-    else:
-        move = "F"
-    if move is None:
-        move = moves[random.randrange(len(moves))]
+    return moves_2[random.randrange(len(moves_2))]
+    # if _last_state is not None:
+    #     move = get_move(dims, state, _last_move, _last_state)
+    # else:
+    #     move = "F"
+    # if move is None:
+    #     move = moves[random.randrange(len(moves))]
     _last_move = move
     _last_state = state
     return _last_move
